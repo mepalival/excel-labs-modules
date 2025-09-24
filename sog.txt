@@ -1,5 +1,7 @@
-//Combine Event,Age Group,Gender with # 
-mpcombine_Event_AG_Gen=
+//https://gist.github.com/mepalival/bb6c24ef0d9d251f073d4f63a16a3074
+
+//Convert Event,Age Group,Gender with Range Value 
+Convert_Event_AG_Gen=
   LAMBDA(AgeGroupValue,GenderValue,EventValue,RangeLookup,
     TEXTJOIN("#",TRUE,
     IFERROR(VLOOKUP(EventValue,RangeLookup,2,FALSE),"NotFound"),
@@ -10,7 +12,7 @@ mpcombine_Event_AG_Gen=
 
 
 //Fetch Data=Main Spreadsheet to New Spreadsheet
-mpFetchData=
+FetchData=
   LAMBDA(RefValue,XlookColumn,XlookReturnColumn,
     XLOOKUP(RefValue,XlookColumn,XlookReturnColumn,"#NotFound")
   );
@@ -18,7 +20,7 @@ mpFetchData=
 
 
 //Split AgeGroup(Gender)Combine Value to AgeGroup#Gender 
-mpsplit_Age_Gen=
+Split_Age_Gen=
   LAMBDA(Age_Gender_CombineValue,
     TEXTJOIN("#",TRUE,
       TEXTBEFORE(Age_Gender_CombineValue," ("),
@@ -44,7 +46,7 @@ DefineAgeGroup=
 
 
 // Print Helps : Filter Command with Specific Column Output        
-mpPrintFilter=
+PrintFilter=
   LAMBDA(aCol1, aCol2, aCol3, aCol4, aCol5,
         aDistrict, aAgeGroup, aEvent,
         valDistrict, valAgeGroup, valEvent,
@@ -64,10 +66,10 @@ mpPrintFilter=
 
 //Check Sheet Column Head is with Proper Head
 //Checking HeadText in Column Header
-mpColumnHead_Finder=
+ColumnHead_Finder=
   LAMBDA(HeadText,TargetRange,
     LET(
-        colNum, MATCH(header, TargetRange, 0),
+        colNum, MATCH(HeadText, TargetRange, 0),
         IF(ISNUMBER(colNum), colNum, "Not Found")
     )
   );
