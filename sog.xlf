@@ -1,0 +1,73 @@
+//Combine Event,Age Group,Gender with # 
+mpcombine_Event_AG_Gen=
+  LAMBDA(AgeGroupValue,GenderValue,EventValue,RangeLookup,
+    TEXTJOIN("#",TRUE,
+    IFERROR(VLOOKUP(EventValue,RangeLookup,2,FALSE),"NotFound"),
+    IFERROR(VLOOKUP(AgeGroupValue,RangeLookup,2,FALSE),"NotFound"),
+    IFERROR(VLOOKUP(GenderValue,RangeLookup,2,FALSE),"NotFound"))
+  );
+
+
+
+//Fetch Data=Main Spreadsheet to New Spreadsheet
+mpFetchData=
+  LAMBDA(RefValue,XlookColumn,XlookReturnColumn,
+    XLOOKUP(RefValue,XlookColumn,XlookReturnColumn,"#NotFound")
+  );
+
+
+
+//Split AgeGroup(Gender)Combine Value to AgeGroup#Gender 
+mpsplit_Age_Gen=
+  LAMBDA(Age_Gender_CombineValue,
+    TEXTJOIN("#",TRUE,
+      TEXTBEFORE(Age_Gender_CombineValue," ("),
+      SWITCH(LEFT(RIGHT(Age_Gender_CombineValue,2),1),
+        "F","Female","M","Male"
+      )
+    )
+  );
+
+// Define Proper Age Group from Age
+DefineAgeGroup=
+  LAMBDA(Age_Number,Gender,
+    LET(AgeGroup,
+      IFS(
+        Age_Number >= 22, "22+",
+        Age_Number >= 16, "16 to 21",
+        Age_Number >= 8, "08 to 15",
+        Age_Number < 8, "Invalid Age"
+      ),
+      AgeGroup & " (" & LEFT(Gender,1) & ")"
+    )
+  );
+
+
+// Print Helps : Filter Command with Specific Column Output        
+mpPrintFilter=
+  LAMBDA(aCol1, aCol2, aCol3, aCol4, aCol5,
+        aDistrict, aAgeGroup, aEvent,
+        valDistrict, valAgeGroup, valEvent,
+    LET(filteredData,
+      FILTER(
+        CHOOSE({1,2,3,4,5}, aCol1, aCol2, aCol3, aCol4, aCol5),
+          (aDistrict = valDistrict) * (aEvent = valEvent) * IF(valAgeGroup = "", 1, aAgeGroup = valAgeGroup)
+      ),
+        IF(
+            ROWS(filteredData) = 0,
+            "No Athletes Found",
+            filteredData
+        )
+    )
+  );
+
+
+//Check Sheet Column Head is with Proper Head
+//Checking HeadText in Column Header
+mpColumnHead_Finder=
+  LAMBDA(HeadText,TargetRange,
+    LET(
+        colNum, MATCH(header, TargetRange, 0),
+        IF(ISNUMBER(colNum), colNum, "Not Found")
+    )
+  );
